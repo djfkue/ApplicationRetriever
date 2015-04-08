@@ -12,8 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Start Scan"
-        android:id="@+id/button"/>
+        android:id="@+id/btn_scan"/>
 
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Clear Cache"
+        android:id="@+id/btn_clear"/>
 
     <TextView android:text="@string/total_cache_size"
         android:layout_width="match_parent"

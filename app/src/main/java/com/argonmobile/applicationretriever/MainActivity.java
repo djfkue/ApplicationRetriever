@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
-import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -17,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -73,7 +71,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        findViewById(R.id.button).setOnClickListener(this);
+        findViewById(R.id.btn_scan).setOnClickListener(this);
+        findViewById(R.id.btn_clear).setOnClickListener(this);
         mCacheListView = (ListView) findViewById(R.id.app_list);
         mAppAdapter = new AppAdapter(this, R.layout.activity_main);
         mCacheListView.setAdapter(mAppAdapter);
@@ -113,18 +112,53 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        mTotalPackageCacheSize = 0;
-        showProgress("Calculating Cache Size..!!!");
-        /**
-         * You can also use async task
-         * */
-        new Thread(new Runnable() {
+        if (v.getId() == R.id.btn_scan) {
+            mTotalPackageCacheSize = 0;
+            showProgress("Calculating Cache Size..!!!");
+            /**
+             * You can also use async task
+             * */
+            new Thread(new Runnable() {
 
-            @Override
-            public void run() {
-                getPackageSize();
+                @Override
+                public void run() {
+                    getPackageSize();
+                }
+            }).start();
+        }
+        if (v.getId() == R.id.btn_clear) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    clearCache();
+                }
+            }).start();
+        }
+    }
+
+    private void clearCache() {
+        PackageManager  pm = getPackageManager();
+        // Get all methods on the PackageManager
+        Method[] methods = pm.getClass().getDeclaredMethods();
+        for (Method m : methods) {
+            if (m.getName().equals("freeStorage")) {
+
+                Log.e(TAG, "freeStorage.............");
+                long time = System.currentTimeMillis();
+                // Found the method I want to use
+                try {
+                    long desiredFreeStorage = Long.MAX_VALUE; // Request for 8GB of free space
+                    m.invoke(pm, desiredFreeStorage , null);
+                } catch (Exception e) {
+                    // Method invocation failed. Could be a permission problem
+                    e.printStackTrace();
+                }
+                long timeInterval = (System.currentTimeMillis() - time);
+
+                Log.e(TAG, "freeStorage............. timeInterval: " + timeInterval);
+                break;
             }
-        }).start();
+        }
     }
 
     private void showProgress(String message) {
